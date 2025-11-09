@@ -1,1 +1,59 @@
 Category Modal
+<!-- ------ -->
+<!-- Header -->
+<!-- ------ -->
+<ion-header>
+  <ion-toolbar>
+    <!-- Cancel Button -->
+    <ion-buttons slot="start">
+      <ion-button color="medium" (click)="cancel()">
+        <ion-icon slot="start" name="close" />
+        Cancel
+      </ion-button>
+    </ion-buttons>
+
+    <!-- Title -->
+    <ion-title>{{ isEditMode() ? 'Edit category' : 'Add category' }}</ion-title>
+
+    <!-- Save Button -->
+    <ion-buttons slot="end">
+      <ion-button (click)="save()" [disabled]="!isValid">
+        <ion-icon slot="start" name="save" />
+        Save
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<!-- ------- -->
+<!-- Content -->
+<!-- ------- -->
+<ion-content class="ion-padding">
+  <!-- Input -->
+  <ion-item>
+    <ion-icon name="text" slot="start" />
+    <ion-input 
+      [formControl]="nameControl"
+      maxlength="40" 
+      placeholder="Name" 
+      type="text"
+      [clearInput]="true"
+    />
+  </ion-item>
+
+  <!-- Fehlermeldung -->
+  @if (nameControl.touched && nameControl.invalid) {
+    <div style="color: var(--ion-color-danger); padding: 8px 16px; font-size: 14px;">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- Delete Button - nur im Edit-Modus anzeigen -->
+  @if (isEditMode()) {
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+      <ion-fab-button color="danger" (click)="delete()">
+        <ion-icon name="trash" />
+      </ion-fab-button>
+    </ion-fab>
+  }
+</ion-content>
