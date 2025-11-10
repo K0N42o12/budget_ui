@@ -9,6 +9,9 @@ import appRoutes from './app/app.routes';
 import { registerLocaleData } from '@angular/common';
 import { PageTitleStrategy } from './app/shared/service/page-title-strategy.service';
 import AppComponent from './app/app.component';
+import { IonicModule } from '@ionic/angular';
+import { provideHttpClient } from '@angular/common/http';
+
 
 if (environment.production) enableProdMode();
 
@@ -21,6 +24,7 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: TitleStrategy, useClass: PageTitleStrategy },
     provideIonicAngular(),
-    provideRouter(appRoutes, withPreloading(PreloadAllModules))
+    provideRouter(appRoutes, withPreloading(PreloadAllModules)),  // ⭐ KOMMA HIER!
+    provideHttpClient(),  // ⭐ NEU
   ]
 }).catch(err => console.error(err));

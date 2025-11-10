@@ -1,1 +1,105 @@
 Expense List
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Expense List</ion-title>
+  </ion-toolbar>
+
+  <!-- Filters -->
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Search expenses"
+      (ionInput)="onSearchChange($event)">
+    </ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-select
+        [(ngModel)]="selectedCategoryId"
+        placeholder="All Categories"
+        (ionChange)="onCategoryChange($event)">
+        <ion-select-option value="">All Categories</ion-select-option>
+        @for (category of categories(); track category.id) {
+          <ion-select-option [value]="category.id">
+            {{ category.name }}
+          </ion-select-option>
+        }
+      </ion-select>
+    </ion-buttons>
+
+    <ion-buttons slot="end">
+      <ion-select
+        [(ngModel)]="sortBy"
+        (ionChange)="onSortChange($event)">
+        <ion-select-option value="date,desc">Newest First</ion-select-option>
+        <ion-select-option value="date,asc">Oldest First</ion-select-option>
+        <ion-select-option value="amount,desc">Highest Amount</ion-select-option>
+        <ion-select-option value="amount,asc">Lowest Amount</ion-select-option>
+      </ion-select>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Total -->
+  <div class="total-container ion-padding">
+    <h2>Total: CHF {{ getTotalAmount().toFixed(2) }}</h2>
+    <p>{{ expenses().length }} expenses</p>
+  </div>
+
+  <!-- Loading Skeleton -->
+  @if (loading()) {
+    <ion-list>
+      @for (i of [1,2,3,4,5]; track i) {
+        <ion-item>
+          <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+        </ion-item>
+      }
+    </ion-list>
+  }
+
+  <!-- Grouped Expenses -->
+  @if (!loading() && groupedExpenses().length > 0) {
+    @for (group of groupedExpenses(); track group.date) {
+      <div class="date-group">
+        <div class="date-header ion-padding">
+          <h3>{{ group.date }}</h3>
+          <ion-chip color="primary">
+            <ion-label>CHF {{ group.total.toFixed(2) }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <ion-list>
+          @for (expense of group.expenses; track expense.id) {
+            <ion-item button (click)="openExpenseModal(expense)">
+              <ion-icon name="pricetag" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <h2>{{ expense.description }}</h2>
+                <p>{{ getCategoryName(expense.categoryId) }}</p>
+              </ion-label>
+              <ion-label slot="end" class="ion-text-right">
+                <h2>CHF {{ expense.amount.toFixed(2) }}</h2>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      </div>
+    }
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && groupedExpenses().length === 0) {
+    <div class="empty-state ion-padding ion-text-center">
+      <ion-icon name="pricetag" size="large" color="medium"></ion-icon>
+      <h2>No expenses found</h2>
+      <p>Tap the + button to add your first expense</p>
+    </div>
+  }
+
+  <!-- FAB Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openExpenseModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

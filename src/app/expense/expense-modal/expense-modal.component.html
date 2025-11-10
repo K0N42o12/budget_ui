@@ -1,1 +1,86 @@
-Expense Modal
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ isEditMode ? 'Edit expense' : 'Add expense' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="save()" [disabled]="expenseForm.invalid">
+        <ion-icon name="save"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="expenseForm">
+    <!-- Amount -->
+    <ion-item>
+      <ion-input
+        #amountInput
+        formControlName="amount"
+        type="number"
+        label="Amount"
+        labelPlacement="floating"
+        placeholder="0.00"
+        [step]="0.01">
+        <ion-icon name="pricetag" slot="start"></ion-icon>
+      </ion-input>
+    </ion-item>
+
+    <!-- Description -->
+    <ion-item>
+      <ion-input
+        formControlName="description"
+        type="text"
+        label="Description"
+        labelPlacement="floating"
+        maxlength="200"
+        placeholder="Enter description">
+        <ion-icon name="text" slot="start"></ion-icon>
+      </ion-input>
+    </ion-item>
+
+    <!-- Category -->
+    <ion-item>
+      <ion-select
+        formControlName="categoryId"
+        label="Category"
+        labelPlacement="floating"
+        placeholder="Select category">
+        @for (category of categories; track category.id) {
+          <ion-select-option [value]="category.id">
+            {{ category.name }}
+          </ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+
+    <!-- Date -->
+    <ion-item>
+      <ion-datetime-button datetime="expense-date">
+        <ion-icon name="calendar" slot="start"></ion-icon>
+      </ion-datetime-button>
+    </ion-item>
+
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime
+          id="expense-date"
+          formControlName="date"
+          presentation="date"
+          [showDefaultButtons]="true">
+        </ion-datetime>
+      </ng-template>
+    </ion-modal>
+  </form>
+
+  @if (isEditMode) {
+    <ion-button expand="block" color="danger" (click)="delete()" class="ion-margin-top">
+      <ion-icon name="trash" slot="start"></ion-icon>
+      Delete Expense
+    </ion-button>
+  }
+</ion-content>

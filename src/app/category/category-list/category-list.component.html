@@ -1,4 +1,3 @@
-Category List
 <!-- ------ -->
 <!-- Header -->
 <!-- ------ -->
@@ -23,12 +22,13 @@ Category List
           <ion-icon name="swap-vertical" slot="start"/>
           <ion-select 
             interface="popover" 
-            [value]="sortOption()"
+            [value]="selectedSort()"
             (ionChange)="onSortChange($event)">
-            <ion-select-option value="name-asc">Name (A-Z)</ion-select-option>
-            <ion-select-option value="name-desc">Name (Z-A)</ion-select-option>
-            <ion-select-option value="created-newest">Created at (newest first)</ion-select-option>
-            <ion-select-option value="created-oldest">Created at (oldest first)</ion-select-option>
+            @for (option of sortOptions; track option.value) {
+              <ion-select-option [value]="option.value">
+                {{ option.label }}
+              </ion-select-option>
+            }
           </ion-select>
         </ion-item>
       </ion-col>
@@ -40,7 +40,8 @@ Category List
             placeholder="Search" 
             [clearInput]="true"
             [value]="searchTerm()"
-            (ionInput)="onSearchChange($event)"/>
+            (ionInput)="onSearchChange($event)"
+          />
         </ion-item>
       </ion-col>
     </ion-row>
@@ -53,8 +54,7 @@ Category List
             <ion-item button="true" [detail]="true" (click)="openModal(category)">
               <ion-label>{{ category.name }}</ion-label>
             </ion-item>
-          }
-          @empty {
+          } @empty {
             <ion-item>
               <ion-label color="medium">
                 <p>No categories found</p>
@@ -73,3 +73,31 @@ Category List
     </ion-fab-button>
   </ion-fab>
 </ion-content>
+```
+
+---
+
+## 📁 **Ordnerstruktur Check:**
+
+Stelle sicher, dass du folgende Dateien hast:
+```
+src/
+  ├── environments/
+  │   ├── environment.ts
+  │   └── environment.prod.ts
+  └── app/
+      ├── shared/
+      │   ├── domain.ts
+      │   └── service/
+      │       ├── toast.service.ts
+      │       ├── loading-indicator.service.ts
+      │       └── page-title-strategy.service.ts (bereits vorhanden)
+      └── category/
+          ├── category.service.ts
+          ├── category.routes.ts
+          ├── category-list/
+          │   ├── category-list.component.ts
+          │   └── category-list.component.html
+          └── category-modal/
+              ├── category-modal.component.ts
+              └── category-modal.component.html
