@@ -1,0 +1,70 @@
+<ion-content class="ion-padding">
+  <div class="login-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title class="ion-text-center">
+          <h1>Budget UI</h1>
+          <p>Login to your account</p>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <!-- Email -->
+          <ion-item>
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-input
+              type="email"
+              formControlName="email"
+              label="Email"
+              labelPlacement="floating"
+              placeholder="Enter your email">
+            </ion-input>
+          </ion-item>
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <ion-text color="danger">
+              <p class="ion-padding-start">
+                <small>Please enter a valid email</small>
+              </p>
+            </ion-text>
+          }
+
+          <!-- Password -->
+          <ion-item>
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input
+              type="password"
+              formControlName="password"
+              label="Password"
+              labelPlacement="floating"
+              placeholder="Enter your password">
+            </ion-input>
+          </ion-item>
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <ion-text color="danger">
+              <p class="ion-padding-start">
+                <small>Password must be at least 6 characters</small>
+              </p>
+            </ion-text>
+          }
+
+          <!-- Login Button -->
+          <ion-button 
+            expand="block" 
+            type="submit" 
+            class="ion-margin-top"
+            [disabled]="loginForm.invalid">
+            Login
+          </ion-button>
+
+          <!-- Forgot Password -->
+          <div class="ion-text-center ion-margin-top">
+            <ion-button fill="clear" size="small" (click)="forgotPassword()">
+              Forgot Password?
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
