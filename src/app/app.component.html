@@ -1,14 +1,24 @@
 <ion-app>
   <ion-split-pane contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
-      <!-- Navigation List -->
       <ion-content>
+        <!-- User Profile Header -->
+        <div class="user-profile ion-padding">
+          <ion-avatar>
+            <ion-icon name="person-circle" size="large"></ion-icon>
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ currentUserEmail }}</h2>
+          </ion-label>
+        </div>
+
+        <!-- Navigation List -->
         <ion-list id="menu-list">
           <ion-list-header>
             <ion-label>Budget UI</ion-label>
           </ion-list-header>
-
-          @for (page of appPages; track page.title; let i = $index) {
+          
+          @for (page of appPages; track page.title) {
             <ion-menu-toggle auto-hide="false">
               <ion-item
                 routerDirection="root"
@@ -16,18 +26,27 @@
                 detail="false"
                 routerLinkActive="selected"
                 [button]="true"
-                [routerLink]="[page.url]"
-              >
-                <ion-icon slot="start" [name]="page.icon" />
+                [routerLink]="[page.url]">
+                <ion-icon slot="start" [name]="page.icon"></ion-icon>
                 <ion-label>{{ page.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
           }
         </ion-list>
+
+        <!-- Logout Button at Bottom -->
+        <div class="logout-container">
+          <ion-menu-toggle auto-hide="false">
+            <ion-item button (click)="logout()" lines="none">
+              <ion-icon slot="start" name="log-out"></ion-icon>
+              <ion-label>LOGOUT</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        </div>
       </ion-content>
     </ion-menu>
 
     <!-- Router Outlet -->
-    <ion-router-outlet id="main-content" />
+    <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>
 </ion-app>
