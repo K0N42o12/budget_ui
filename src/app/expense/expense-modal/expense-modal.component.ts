@@ -1,6 +1,6 @@
 import { Component, inject, Input, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ModalController, ViewDidEnter } from '@ionic/angular';
+import { ViewDidEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { close, save, trash, calendar, pricetag, text } from 'ionicons/icons';
 import { Expense, ExpenseUpsertDto, Category } from '../../shared/domain';
@@ -9,13 +9,45 @@ import { CategoryService } from '../../category/category.service';
 import { ToastService } from '../../shared/service/toast.service';
 import { LoadingIndicatorService } from '../../shared/service/loading-indicator.service';
 import { finalize } from 'rxjs';
-import { IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonContent, IonItem, IonInput, IonSelect, IonSelectOption, IonDatetime, IonDatetimeButton, IonModal } from '@ionic/angular/standalone';
+import { 
+  IonHeader, 
+  IonToolbar, 
+  IonButtons, 
+  IonButton, 
+  IonIcon, 
+  IonTitle, 
+  IonContent, 
+  IonItem, 
+  IonInput, 
+  IonSelect, 
+  IonSelectOption, 
+  IonDatetime, 
+  IonDatetimeButton, 
+  IonModal,
+  ModalController 
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-expense-modal',
   templateUrl: './expense-modal.component.html',
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonContent, IonItem, IonInput, IonSelect, IonSelectOption, IonDatetime, IonDatetimeButton, IonModal, ReactiveFormsModule]
+  imports: [
+    IonHeader, 
+    IonToolbar, 
+    IonButtons, 
+    IonButton, 
+    IonIcon, 
+    IonTitle, 
+    IonContent, 
+    IonItem, 
+    IonInput, 
+    IonSelect, 
+    IonSelectOption, 
+    IonDatetime, 
+    IonDatetimeButton, 
+    IonModal, 
+    ReactiveFormsModule
+  ]
 })
 export default class ExpenseModalComponent implements ViewDidEnter {
   private readonly expenseService = inject(ExpenseService);

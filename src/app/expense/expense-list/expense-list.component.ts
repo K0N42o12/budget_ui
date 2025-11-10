@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add, calendar, pricetag, search, swapVertical } from 'ionicons/icons';
 import { Expense, Category, ExpenseCriteria } from '../../shared/domain';
@@ -27,7 +26,8 @@ import {
   IonSelectOption,
   IonButtons,
   IonChip,
-  IonSkeletonText
+  IonSkeletonText,
+  ModalController
 } from '@ionic/angular/standalone';
 
 interface GroupedExpenses {
