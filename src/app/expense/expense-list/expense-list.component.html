@@ -1,97 +1,126 @@
-Expense List
 <ion-header>
   <ion-toolbar>
-    <ion-title>Expense List</ion-title>
-  </ion-toolbar>
-
-  <!-- Filters -->
-  <ion-toolbar>
-    <ion-searchbar
-      placeholder="Search expenses"
-      (ionInput)="onSearchChange($event)">
-    </ion-searchbar>
-  </ion-toolbar>
-
-  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-select
-        [(ngModel)]="selectedCategoryId"
-        placeholder="All Categories"
-        (ionChange)="onCategoryChange($event)">
-        <ion-select-option value="">All Categories</ion-select-option>
-        @for (category of categories(); track category.id) {
-          <ion-select-option [value]="category.id">
-            {{ category.name }}
-          </ion-select-option>
-        }
-      </ion-select>
+      <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
+    <ion-title>Expenses</ion-title>
     <ion-buttons slot="end">
-      <ion-select
-        [(ngModel)]="sortBy"
-        (ionChange)="onSortChange($event)">
-        <ion-select-option value="date,desc">Newest First</ion-select-option>
-        <ion-select-option value="date,asc">Oldest First</ion-select-option>
-        <ion-select-option value="amount,desc">Highest Amount</ion-select-option>
-        <ion-select-option value="amount,asc">Lowest Amount</ion-select-option>
-      </ion-select>
+      <ion-button>
+        <ion-icon slot="icon-only" name="person-circle"></ion-icon>
+      </ion-button>
     </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Filter Toolbar with Grid Layout -->
+  <ion-toolbar>
+    <ion-grid>
+      <ion-row>
+        <!-- Sort Column -->
+        <ion-col size="4">
+          <ion-item lines="none">
+            <ion-icon name="swap-vertical" slot="start"></ion-icon>
+            <ion-select
+              interface="popover"
+              [(ngModel)]="sortBy"
+              (ionChange)="onSortChange($event)"
+              placeholder="Date (newest first)">
+              <ion-select-option value="date,desc">Date (newest first)</ion-select-option>
+              <ion-select-option value="date,asc">Date (oldest first)</ion-select-option>
+              <ion-select-option value="amount,desc">Amount (highest)</ion-select-option>
+              <ion-select-option value="amount,asc">Amount (lowest)</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+
+        <!-- Category Column -->
+        <ion-col size="4">
+          <ion-item lines="none">
+            <ion-icon name="pricetag" slot="start"></ion-icon>
+            <ion-select
+              interface="popover"
+              [(ngModel)]="selectedCategoryId"
+              (ionChange)="onCategoryChange($event)"
+              placeholder="Category">
+              <ion-select-option value="">All Categories</ion-select-option>
+              @for (category of categories(); track category.id) {
+                <ion-select-option [value]="category.id">
+                  {{ category.name }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+        </ion-col>
+
+        <!-- Search Column -->
+        <ion-col size="4">
+          <ion-item lines="none">
+            <ion-icon name="search" slot="start"></ion-icon>
+            <ion-label>Search</ion-label>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <!-- Total -->
-  <div class="total-container ion-padding">
-    <h2>Total: CHF {{ getTotalAmount().toFixed(2) }}</h2>
-    <p>{{ expenses().length }} expenses</p>
-  </div>
-
-  <!-- Loading Skeleton -->
   @if (loading()) {
     <ion-list>
       @for (i of [1,2,3,4,5]; track i) {
         <ion-item>
-          <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 100%; height: 60px;"></ion-skeleton-text>
         </ion-item>
       }
     </ion-list>
   }
 
-  <!-- Grouped Expenses -->
-  @if (!loading() && groupedExpenses().length > 0) {
+  @if (!loading()) {
     @for (group of groupedExpenses(); track group.date) {
-      <div class="date-group">
-        <div class="date-header ion-padding">
-          <h3>{{ group.date }}</h3>
-          <ion-chip color="primary">
-            <ion-label>CHF {{ group.total.toFixed(2) }}</ion-label>
-          </ion-chip>
-        </div>
+      <!-- Date Divider with Total -->
+      <ion-item-divider>
+        <ion-label>{{ group.date }}</ion-label>
+        <ion-chip slot="end" color="primary">
+          CHF {{ group.total.toFixed(2) }}
+        </ion-chip>
+      </ion-item-divider>
 
-        <ion-list>
-          @for (expense of group.expenses; track expense.id) {
-            <ion-item button (click)="openExpenseModal(expense)">
-              <ion-icon name="pricetag" slot="start" color="primary"></ion-icon>
-              <ion-label>
-                <h2>{{ expense.description }}</h2>
-                <p>{{ getCategoryName(expense.categoryId) }}</p>
-              </ion-label>
-              <ion-label slot="end" class="ion-text-right">
-                <h2>CHF {{ expense.amount.toFixed(2) }}</h2>
-              </ion-label>
-            </ion-item>
-          }
-        </ion-list>
-      </div>
+      <!-- Expense List for this Date -->
+      @for (expense of group.expenses; track expense.id) {
+        <ion-item button (click)="openExpenseModal(expense)" detail="true">
+          <ion-grid style="padding: 0;">
+            <ion-row class="ion-align-items-center">
+              <!-- Description (left) -->
+              <ion-col size="4">
+                <ion-label>
+                  <h2>{{ expense.description }}</h2>
+                </ion-label>
+              </ion-col>
+              
+              <!-- Category Chip (center) -->
+              <ion-col size="4" class="ion-text-center">
+                <ion-chip>
+                  <ion-icon name="pricetag"></ion-icon>
+                  <ion-label>{{ getCategoryName(expense.categoryId) }}</ion-label>
+                </ion-chip>
+              </ion-col>
+              
+              <!-- Amount (right) -->
+              <ion-col size="4" class="ion-text-right">
+                <ion-note style="font-size: 16px; font-weight: 500;">
+                  CHF {{ expense.amount.toFixed(2) }}
+                </ion-note>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-item>
+      }
     }
   }
 
-  <!-- Empty State -->
   @if (!loading() && groupedExpenses().length === 0) {
-    <div class="empty-state ion-padding ion-text-center">
-      <ion-icon name="pricetag" size="large" color="medium"></ion-icon>
-      <h2>No expenses found</h2>
+    <div class="ion-padding ion-text-center" style="margin-top: 100px;">
+      <ion-icon name="receipt-outline" size="large" color="medium"></ion-icon>
+      <h2>No expenses yet</h2>
       <p>Tap the + button to add your first expense</p>
     </div>
   }
@@ -103,3 +132,24 @@ Expense List
     </ion-fab-button>
   </ion-fab>
 </ion-content>
+
+<!-- Month Navigator -->
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="previousMonth()">
+        <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    
+    <ion-title class="ion-text-center">
+      {{ currentMonthDisplay }}
+    </ion-title>
+    
+    <ion-buttons slot="end">
+      <ion-button (click)="nextMonth()">
+        <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { add, calendar, pricetag, search, swapVertical } from 'ionicons/icons';
+import { add, calendar, pricetag, search, swapVertical, personCircle, chevronForward, chevronBack } from 'ionicons/icons';
 import { Expense, Category, ExpenseCriteria } from '../../shared/domain';
 import { ExpenseService } from '../expense.service';
 import { CategoryService } from '../../category/category.service';
@@ -15,18 +15,26 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
+  IonFooter,
   IonFab,
   IonFabButton,
   IonIcon,
   IonList,
   IonItem,
   IonLabel,
+  IonNote,
   IonSearchbar,
   IonSelect,
   IonSelectOption,
   IonButtons,
+  IonButton,
   IonChip,
   IonSkeletonText,
+  IonItemDivider,
+  IonMenuButton,
+  IonGrid,
+  IonRow,
+  IonCol,
   ModalController
 } from '@ionic/angular/standalone';
 
@@ -47,18 +55,26 @@ interface GroupedExpenses {
     IonToolbar,
     IonTitle,
     IonContent,
+    IonFooter,
     IonFab,
     IonFabButton,
     IonIcon,
     IonList,
     IonItem,
     IonLabel,
+    IonNote,
     IonSearchbar,
     IonSelect,
     IonSelectOption,
     IonButtons,
+    IonButton,
     IonChip,
-    IonSkeletonText
+    IonSkeletonText,
+    IonItemDivider,
+    IonMenuButton,
+    IonGrid,
+    IonRow,
+    IonCol
   ]
 })
 export default class ExpenseListComponent {
@@ -78,9 +94,11 @@ export default class ExpenseListComponent {
   searchTerm = '';
   selectedCategoryId = '';
   sortBy = 'date,desc';
+  currentMonth = new Date();
+  currentMonthDisplay = this.formatMonth(this.currentMonth);
 
   constructor() {
-    addIcons({ add, calendar, pricetag, search, swapVertical });
+    addIcons({ add, calendar, pricetag, search, swapVertical, personCircle, chevronForward, chevronBack });
     this.loadCategories();
     this.loadExpenses();
   }
@@ -123,10 +141,10 @@ export default class ExpenseListComponent {
     const grouped = new Map<string, Expense[]>();
 
     expenses.forEach(expense => {
-      const dateKey = new Date(expense.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      const dateKey = new Date(expense.date).toLocaleDateString('de-CH', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
       });
 
       if (!grouped.has(dateKey)) {
@@ -185,10 +203,10 @@ export default class ExpenseListComponent {
 
     const grouped = new Map<string, Expense[]>();
     filtered.forEach(expense => {
-      const dateKey = new Date(expense.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      const dateKey = new Date(expense.date).toLocaleDateString('de-CH', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
       });
       if (!grouped.has(dateKey)) {
         grouped.set(dateKey, []);
@@ -212,5 +230,30 @@ export default class ExpenseListComponent {
 
   getTotalAmount(): number {
     return this.expenses().reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  toggleSearch(): void {
+    console.log('Search clicked');
+  }
+
+  previousMonth(): void {
+    this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
+    this.currentMonthDisplay = this.formatMonth(this.currentMonth);
+    // TODO: Filter expenses by month
+    console.log('Previous month:', this.currentMonthDisplay);
+  }
+
+  nextMonth(): void {
+    this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
+    this.currentMonthDisplay = this.formatMonth(this.currentMonth);
+    // TODO: Filter expenses by month
+    console.log('Next month:', this.currentMonthDisplay);
+  }
+
+  formatMonth(date: Date): string {
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
   }
 }
