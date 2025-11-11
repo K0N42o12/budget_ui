@@ -53,7 +53,7 @@
 
         <!-- Search Column -->
         <ion-col size="4">
-          <ion-item lines="none">
+          <ion-item lines="none" button (click)="toggleSearch()">
             <ion-icon name="search" slot="start"></ion-icon>
             <ion-label>Search</ion-label>
           </ion-item>
@@ -61,6 +61,19 @@
       </ion-row>
     </ion-grid>
   </ion-toolbar>
+
+  <!-- Expandable Search Bar -->
+  @if (showSearch) {
+    <ion-toolbar>
+      <ion-searchbar
+        [(ngModel)]="searchTerm"
+        (ionInput)="onSearchInput($event)"
+        (ionClear)="onSearchClear()"
+        placeholder="Search expenses..."
+        [debounce]="300">
+      </ion-searchbar>
+    </ion-toolbar>
+  }
 </ion-header>
 
 <ion-content>

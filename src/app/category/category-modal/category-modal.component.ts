@@ -73,7 +73,7 @@ export default class CategoryModalComponent implements ViewDidEnter {
       });
     }
     // Input fokussieren
-    this.nameInput?.setFocus();
+    setTimeout(() => this.nameInput?.setFocus(), 300);
   }
 
   // Actions
@@ -82,17 +82,27 @@ export default class CategoryModalComponent implements ViewDidEnter {
   }
 
   save(): void {
+    if (this.categoryForm.invalid) {
+      this.categoryForm.markAllAsTouched();
+      return;
+    }
+
     this.loadingIndicatorService
       .showLoadingIndicator({ message: 'Saving category' })
       .subscribe(loadingIndicator => {
-        const category = this.categoryForm.value as CategoryUpsertDto;
+        const formValue = this.categoryForm.value;
+        const category: CategoryUpsertDto = {
+          id: formValue.id || undefined,
+          name: formValue.name || undefined
+        };
+
         this.categoryService
           .upsertCategory(category)
           .pipe(finalize(() => loadingIndicator.dismiss()))
           .subscribe({
             next: () => {
               this.toastService.displaySuccessToast('Category saved');
-              this.modalCtrl.dismiss(null, 'refresh');
+              this.modalCtrl.dismiss({ categoryId: category.id }, 'refresh');
             },
             error: error => this.toastService.displayWarningToast('Could not save category', error)
           });

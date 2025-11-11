@@ -96,6 +96,7 @@ export default class ExpenseListComponent {
   sortBy = 'date,desc';
   currentMonth = new Date();
   currentMonthDisplay = this.formatMonth(this.currentMonth);
+  showSearch = false;
 
   constructor() {
     addIcons({ add, calendar, pricetag, search, swapVertical, personCircle, chevronForward, chevronBack });
@@ -233,7 +234,21 @@ export default class ExpenseListComponent {
   }
 
   toggleSearch(): void {
-    console.log('Search clicked');
+    this.showSearch = !this.showSearch;
+    if (!this.showSearch) {
+      this.searchTerm = '';
+      this.onSearchClear();
+    }
+  }
+
+  onSearchInput(event: any): void {
+    this.searchTerm = event.detail.value || '';
+    this.filterExpenses();
+  }
+
+  onSearchClear(): void {
+    this.searchTerm = '';
+    this.groupExpensesByDate();
   }
 
   previousMonth(): void {
