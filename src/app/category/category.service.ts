@@ -22,19 +22,26 @@ export class CategoryService {
   // Read
   getCategories = (pagingCriteria: CategoryCriteria): Observable<Page<Category>> => {
     if (environment.useMockData) {
+      const page = pagingCriteria.page || 0;
+      const size = pagingCriteria.size || 10;
+      const start = page * size;
+      const end = start + size;
+      const paginatedContent = this.mockCategories.slice(start, end);
+
       // Mock-Response
       const mockPage: Page<Category> = {
-        content: this.mockCategories,
+        content: paginatedContent,
         totalElements: this.mockCategories.length,
-        totalPages: 1,
-        size: 10,
-        number: 0
+        totalPages: Math.ceil(this.mockCategories.length / size),
+        size: size,
+        number: page,
+        last: end >= this.mockCategories.length
       };
       return of(mockPage).pipe(delay(500));
     }
-    
+
     return this.httpClient.get<Page<Category>>(this.apiUrl, { 
-      params: new HttpParams({ fromObject: { ...pagingCriteria } }) 
+      params: new HttpParams({ fromObject: { ...pagingCriteria } as any }) 
     });
   }
 
@@ -42,9 +49,9 @@ export class CategoryService {
     if (environment.useMockData) {
       return of([...this.mockCategories]).pipe(delay(300));
     }
-    
+
     return this.httpClient.get<Category[]>(this.apiV2Url, { 
-      params: new HttpParams({ fromObject: { ...sortCriteria } }) 
+      params: new HttpParams({ fromObject: { ...sortCriteria } as any }) 
     });
   }
 
@@ -73,7 +80,7 @@ export class CategoryService {
       }
       return of(void 0).pipe(delay(500));
     }
-    
+
     return this.httpClient.put<void>(this.apiUrl, category);
   }
 
@@ -83,7 +90,7 @@ export class CategoryService {
       this.mockCategories = this.mockCategories.filter(c => c.id !== id);
       return of(void 0).pipe(delay(500));
     }
-    
+
     return this.httpClient.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

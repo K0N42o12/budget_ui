@@ -11,6 +11,11 @@
     </ion-buttons>
   </ion-toolbar>
 
+  <!-- Progress Bar -->
+  @if (loading() || loadingMore()) {
+    <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
+  }
+
   <!-- Filter Toolbar with Grid Layout -->
   <ion-toolbar>
     <ion-grid>
@@ -77,6 +82,12 @@
 </ion-header>
 
 <ion-content>
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading Skeletons -->
   @if (loading()) {
     <ion-list>
       @for (i of [1,2,3,4,5]; track i) {
@@ -87,55 +98,65 @@
     </ion-list>
   }
 
+  <!-- Expense List -->
   @if (!loading()) {
-    @for (group of groupedExpenses(); track group.date) {
-      <!-- Date Divider with Total -->
-      <ion-item-divider>
-        <ion-label>{{ group.date }}</ion-label>
-        <ion-chip slot="end" color="primary">
-          CHF {{ group.total.toFixed(2) }}
-        </ion-chip>
-      </ion-item-divider>
+    @if (groupedExpenses().length > 0) {
+      @for (group of groupedExpenses(); track group.date) {
+        <!-- Date Divider with Total -->
+        <ion-item-divider>
+          <ion-label>{{ group.date }}</ion-label>
+          <ion-chip slot="end" color="primary">
+            CHF {{ group.total.toFixed(2) }}
+          </ion-chip>
+        </ion-item-divider>
 
-      <!-- Expense List for this Date -->
-      @for (expense of group.expenses; track expense.id) {
-        <ion-item button (click)="openExpenseModal(expense)" detail="true">
-          <ion-grid style="padding: 0;">
-            <ion-row class="ion-align-items-center">
-              <!-- Description (left) -->
-              <ion-col size="4">
-                <ion-label>
-                  <h2>{{ expense.description }}</h2>
-                </ion-label>
-              </ion-col>
-              
-              <!-- Category Chip (center) -->
-              <ion-col size="4" class="ion-text-center">
-                <ion-chip>
-                  <ion-icon name="pricetag"></ion-icon>
-                  <ion-label>{{ getCategoryName(expense.categoryId) }}</ion-label>
-                </ion-chip>
-              </ion-col>
-              
-              <!-- Amount (right) -->
-              <ion-col size="4" class="ion-text-right">
-                <ion-note style="font-size: 16px; font-weight: 500;">
-                  CHF {{ expense.amount.toFixed(2) }}
-                </ion-note>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
+        <!-- Expense List for this Date -->
+        @for (expense of group.expenses; track expense.id) {
+          <ion-item button (click)="openExpenseModal(expense)" detail="true">
+            <ion-grid style="padding: 0;">
+              <ion-row class="ion-align-items-center">
+                <!-- Description (left) -->
+                <ion-col size="4">
+                  <ion-label>
+                    <h2>{{ expense.description }}</h2>
+                  </ion-label>
+                </ion-col>
+                
+                <!-- Category Chip (center) -->
+                <ion-col size="4" class="ion-text-center">
+                  <ion-chip>
+                    <ion-icon name="pricetag"></ion-icon>
+                    <ion-label>{{ getCategoryName(expense.categoryId) }}</ion-label>
+                  </ion-chip>
+                </ion-col>
+                
+                <!-- Amount (right) -->
+                <ion-col size="4" class="ion-text-right">
+                  <ion-note style="font-size: 16px; font-weight: 500;">
+                    CHF {{ expense.amount.toFixed(2) }}
+                  </ion-note>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-item>
+        }
       }
-    }
-  }
 
-  @if (!loading() && groupedExpenses().length === 0) {
-    <div class="ion-padding ion-text-center" style="margin-top: 100px;">
-      <ion-icon name="receipt-outline" size="large" color="medium"></ion-icon>
-      <h2>No expenses yet</h2>
-      <p>Tap the + button to add your first expense</p>
-    </div>
+      <!-- Infinite Scroll -->
+      <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMoreExpenses($event)">
+        <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more expenses...">
+        </ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+    }
+
+    <!-- Empty State -->
+    @if (groupedExpenses().length === 0) {
+      <div class="ion-padding ion-text-center" style="margin-top: 100px;">
+        <ion-icon name="calendar-outline" size="large" color="medium"></ion-icon>
+        <h2>No expenses in {{ currentMonthDisplay }}</h2>
+        <p>Tap the + button to add your first expense for this month</p>
+      </div>
+    }
   }
 
   <!-- FAB Button -->

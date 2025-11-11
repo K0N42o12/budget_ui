@@ -25,7 +25,7 @@ export class ExpenseService {
       amount: 12.00,
       description: 'Bus ticket',
       categoryId: '2',
-      date: new Date('2025-11-09'),
+      date: new Date('2025-11-08'),
       createdAt: new Date(),
       lastModifiedAt: new Date()
     },
@@ -69,12 +69,12 @@ export class ExpenseService {
         filtered = filtered.filter(e => e.categoryId === criteria.categoryId);
       }
 
-      // Filter nach Datum
-      if (criteria.fromDate) {
-        filtered = filtered.filter(e => new Date(e.date) >= criteria.fromDate!);
+      // Filter nach Datum (startDate und endDate)
+      if (criteria.startDate) {
+        filtered = filtered.filter(e => new Date(e.date) >= criteria.startDate!);
       }
-      if (criteria.toDate) {
-        filtered = filtered.filter(e => new Date(e.date) <= criteria.toDate!);
+      if (criteria.endDate) {
+        filtered = filtered.filter(e => new Date(e.date) <= criteria.endDate!);
       }
 
       // Sortierung
@@ -108,7 +108,8 @@ export class ExpenseService {
         totalElements: filtered.length,
         totalPages: Math.ceil(filtered.length / size),
         size: size,
-        number: page
+        number: page,
+        last: end >= filtered.length  // ← WICHTIG für Infinite Scroll
       };
 
       return of(mockPage).pipe(delay(500));

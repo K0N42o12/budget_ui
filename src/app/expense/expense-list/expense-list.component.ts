@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { add, calendar, pricetag, search, swapVertical, personCircle, chevronForward, chevronBack } from 'ionicons/icons';
 import { Expense, Category, ExpenseCriteria } from '../../shared/domain';
@@ -35,7 +35,13 @@ import {
   IonGrid,
   IonRow,
   IonCol,
-  ModalController
+  IonRefresher,
+  IonRefresherContent,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  IonProgressBar,
+  ModalController,
+  InfiniteScrollCustomEvent
 } from '@ionic/angular/standalone';
 
 interface GroupedExpenses {
@@ -74,7 +80,12 @@ interface GroupedExpenses {
     IonMenuButton,
     IonGrid,
     IonRow,
-    IonCol
+    IonCol,
+    IonRefresher,
+    IonRefresherContent,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
+    IonProgressBar
   ]
 })
 export default class ExpenseListComponent {
@@ -89,6 +100,12 @@ export default class ExpenseListComponent {
   categories = signal<Category[]>([]);
   groupedExpenses = signal<GroupedExpenses[]>([]);
   loading = signal(false);
+  loadingMore = signal(false);
+  
+  // Pagination
+  currentPage = 0;
+  pageSize = 20;
+  hasMoreData = true;
   
   // Filter
   searchTerm = '';
@@ -97,6 +114,8 @@ export default class ExpenseListComponent {
   currentMonth = new Date();
   currentMonthDisplay = this.formatMonth(this.currentMonth);
   showSearch = false;
+
+  @ViewChild(IonInfiniteScroll) infiniteScroll?: IonInfiniteScroll;
 
   constructor() {
     addIcons({ add, calendar, pricetag, search, swapVertical, personCircle, chevronForward, chevronBack });
@@ -111,12 +130,18 @@ export default class ExpenseListComponent {
     });
   }
 
-  loadExpenses(): void {
-    this.loading.set(true);
+  loadExpenses(append: boolean = false): void {
+    if (!append) {
+      this.loading.set(true);
+      this.currentPage = 0;
+      this.hasMoreData = true;
+    } else {
+      this.loadingMore.set(true);
+    }
     
     const criteria: ExpenseCriteria = {
-      page: 0,
-      size: 100,
+      page: this.currentPage,
+      size: this.pageSize,
       sort: this.sortBy
     };
 
@@ -124,17 +149,81 @@ export default class ExpenseListComponent {
       criteria.categoryId = this.selectedCategoryId;
     }
 
+    // Filter by current month
+    const startOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+    const endOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0, 23, 59, 59);
+    
+    criteria.startDate = startOfMonth;
+    criteria.endDate = endOfMonth;
+
     this.expenseService.getExpenses(criteria).subscribe({
       next: page => {
-        this.expenses.set(page.content);
+        if (append) {
+          const currentExpenses = this.expenses();
+          this.expenses.set([...currentExpenses, ...page.content]);
+        } else {
+          this.expenses.set(page.content);
+        }
+        
+        this.hasMoreData = !page.last;
         this.groupExpensesByDate();
         this.loading.set(false);
+        this.loadingMore.set(false);
       },
       error: error => {
         this.toastService.displayWarningToast('Could not load expenses', error);
         this.loading.set(false);
+        this.loadingMore.set(false);
       }
     });
+  }
+
+  loadMoreExpenses(event: InfiniteScrollCustomEvent): void {
+    if (!this.hasMoreData) {
+      event.target.complete();
+      return;
+    }
+
+    this.currentPage++;
+    
+    const criteria: ExpenseCriteria = {
+      page: this.currentPage,
+      size: this.pageSize,
+      sort: this.sortBy
+    };
+
+    if (this.selectedCategoryId) {
+      criteria.categoryId = this.selectedCategoryId;
+    }
+
+    // Filter by current month
+    const startOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+    const endOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0, 23, 59, 59);
+    
+    criteria.startDate = startOfMonth;
+    criteria.endDate = endOfMonth;
+
+    this.expenseService.getExpenses(criteria).subscribe({
+      next: page => {
+        const currentExpenses = this.expenses();
+        this.expenses.set([...currentExpenses, ...page.content]);
+        this.hasMoreData = !page.last;
+        this.groupExpensesByDate();
+        event.target.complete();
+      },
+      error: error => {
+        this.toastService.displayWarningToast('Could not load more expenses', error);
+        event.target.complete();
+      }
+    });
+  }
+
+  handleRefresh(event: any): void {
+    this.currentPage = 0;
+    this.loadExpenses();
+    setTimeout(() => {
+      event.target.complete();
+    }, 500);
   }
 
   groupExpensesByDate(): void {
@@ -252,17 +341,15 @@ export default class ExpenseListComponent {
   }
 
   previousMonth(): void {
-    this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
     this.currentMonthDisplay = this.formatMonth(this.currentMonth);
-    // TODO: Filter expenses by month
-    console.log('Previous month:', this.currentMonthDisplay);
+    this.loadExpenses();
   }
 
   nextMonth(): void {
-    this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
     this.currentMonthDisplay = this.formatMonth(this.currentMonth);
-    // TODO: Filter expenses by month
-    console.log('Next month:', this.currentMonthDisplay);
+    this.loadExpenses();
   }
 
   formatMonth(date: Date): string {

@@ -35,6 +35,7 @@ export interface Page<T> {
   totalPages: number;
   size: number;
   number: number;
+  last: boolean;  // ← WICHTIG: Für Infinite Scroll
 }
 
 // Expense
@@ -61,6 +62,6 @@ export interface ExpenseCriteria {
   size?: number;
   sort?: string;
   categoryId?: string;
-  fromDate?: Date;
-  toDate?: Date;
+  startDate?: Date;
+  endDate?: Date;
 }
