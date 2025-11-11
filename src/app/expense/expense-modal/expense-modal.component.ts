@@ -1,6 +1,6 @@
 import { Component, inject, Input, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ModalController, ViewDidEnter } from '@ionic/angular/standalone';
+import { ModalController, ViewDidEnter, AlertController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { close, save, trash, calendar, pricetag, text, addCircle } from 'ionicons/icons';
 import { Expense, ExpenseUpsertDto, Category } from '../../shared/domain';
@@ -55,6 +55,7 @@ export default class ExpenseModalComponent implements ViewDidEnter {
   private readonly formBuilder = inject(FormBuilder);
   private readonly loadingIndicatorService = inject(LoadingIndicatorService);
   private readonly modalCtrl = inject(ModalController);
+  private readonly alertCtrl = inject(AlertController);
   private readonly toastService = inject(ToastService);
   
   @Input() expense?: Expense;
@@ -160,7 +161,34 @@ export default class ExpenseModalComponent implements ViewDidEnter {
     });
   }
 
-  delete(): void {
+  async delete(): Promise<void> {
+    if (!this.expense?.id) return;
+
+    // Bestätigungsdialog anzeigen
+    const alert = await this.alertCtrl.create({
+      header: 'Delete Expense?',
+      message: `Are you sure you want to delete "${this.expense.description}"? This action cannot be undone.`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          cssClass: 'danger',
+          handler: () => {
+            this.performDelete();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private performDelete(): void {
     if (!this.expense?.id) return;
     
     this.isSaving = true;
