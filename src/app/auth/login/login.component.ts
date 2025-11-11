@@ -6,9 +6,6 @@ import { ToastService } from '../../shared/service/toast.service';
 import { LoadingIndicatorService } from '../../shared/service/loading-indicator.service';
 import { finalize } from 'rxjs';
 import { 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
   IonContent, 
   IonCard, 
   IonCardHeader, 
@@ -29,9 +26,6 @@ import { mailOutline, lockClosedOutline } from 'ionicons/icons';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonCard,
     IonCardHeader,

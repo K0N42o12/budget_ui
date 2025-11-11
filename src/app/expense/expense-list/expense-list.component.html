@@ -28,25 +28,29 @@
               interface="popover"
               [(ngModel)]="sortBy"
               (ionChange)="onSortChange($event)"
-              placeholder="Date (newest first)">
+              placeholder="Sort by">
               <ion-select-option value="date,desc">Date (newest first)</ion-select-option>
               <ion-select-option value="date,asc">Date (oldest first)</ion-select-option>
               <ion-select-option value="amount,desc">Amount (highest)</ion-select-option>
               <ion-select-option value="amount,asc">Amount (lowest)</ion-select-option>
+              <ion-select-option value="description,asc">Name (A-Z)</ion-select-option>
+              <ion-select-option value="description,desc">Name (Z-A)</ion-select-option>
+              <ion-select-option value="createdAt,desc">Created (newest)</ion-select-option>
+              <ion-select-option value="createdAt,asc">Created (oldest)</ion-select-option>
             </ion-select>
           </ion-item>
         </ion-col>
 
-        <!-- Category Column -->
+        <!-- Category Column - MULTISELECT -->
         <ion-col size="4">
           <ion-item lines="none">
             <ion-icon name="pricetag" slot="start"></ion-icon>
             <ion-select
               interface="popover"
-              [(ngModel)]="selectedCategoryId"
+              [(ngModel)]="selectedCategoryIds"
               (ionChange)="onCategoryChange($event)"
-              placeholder="Category">
-              <ion-select-option value="">All Categories</ion-select-option>
+              placeholder="Categories"
+              multiple="true">
               @for (category of categories(); track category.id) {
                 <ion-select-option [value]="category.id">
                   {{ category.name }}

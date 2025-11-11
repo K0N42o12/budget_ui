@@ -109,7 +109,7 @@ export default class ExpenseListComponent {
   
   // Filter
   searchTerm = '';
-  selectedCategoryId = '';
+  selectedCategoryIds: string[] = [];  // ← MULTISELECT: Array statt string
   sortBy = 'date,desc';
   currentMonth = new Date();
   currentMonthDisplay = this.formatMonth(this.currentMonth);
@@ -145,9 +145,7 @@ export default class ExpenseListComponent {
       sort: this.sortBy
     };
 
-    if (this.selectedCategoryId) {
-      criteria.categoryId = this.selectedCategoryId;
-    }
+    // KEIN categoryId an Backend senden - wir filtern lokal
 
     // Filter by current month
     const startOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
@@ -158,11 +156,18 @@ export default class ExpenseListComponent {
 
     this.expenseService.getExpenses(criteria).subscribe({
       next: page => {
+        let content = page.content;
+        
+        // ← MULTISELECT: Lokales Filtern wenn Kategorien ausgewählt sind
+        if (this.selectedCategoryIds.length > 0) {
+          content = content.filter(e => this.selectedCategoryIds.includes(e.categoryId));
+        }
+        
         if (append) {
           const currentExpenses = this.expenses();
-          this.expenses.set([...currentExpenses, ...page.content]);
+          this.expenses.set([...currentExpenses, ...content]);
         } else {
-          this.expenses.set(page.content);
+          this.expenses.set(content);
         }
         
         this.hasMoreData = !page.last;
@@ -192,9 +197,7 @@ export default class ExpenseListComponent {
       sort: this.sortBy
     };
 
-    if (this.selectedCategoryId) {
-      criteria.categoryId = this.selectedCategoryId;
-    }
+    // KEIN categoryId an Backend senden - wir filtern lokal
 
     // Filter by current month
     const startOfMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
@@ -205,8 +208,15 @@ export default class ExpenseListComponent {
 
     this.expenseService.getExpenses(criteria).subscribe({
       next: page => {
+        let content = page.content;
+        
+        // Lokales Filtern wenn mehrere Kategorien ausgewählt
+        if (this.selectedCategoryIds.length > 0) {
+          content = content.filter(e => this.selectedCategoryIds.includes(e.categoryId));
+        }
+        
         const currentExpenses = this.expenses();
-        this.expenses.set([...currentExpenses, ...page.content]);
+        this.expenses.set([...currentExpenses, ...content]);
         this.hasMoreData = !page.last;
         this.groupExpensesByDate();
         event.target.complete();
@@ -272,7 +282,7 @@ export default class ExpenseListComponent {
   }
 
   onCategoryChange(event: any): void {
-    this.selectedCategoryId = event.detail.value || '';
+    this.selectedCategoryIds = event.detail.value || [];
     this.loadExpenses();
   }
 
